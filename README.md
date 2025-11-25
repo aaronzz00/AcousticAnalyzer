@@ -76,7 +76,7 @@ npm run build
 
 - **[User Manual / 使用手册](docs/USER_MANUAL.md)**: Comprehensive bilingual guide / 详细的双语指南
 - **[Project Requirements](Project_Requirements_Spec.md)**: Technical specifications / 技术规格
-- **[AWS Deployment Guide](.gemini/antigravity/brain/*/AWS_DEPLOYMENT_GUIDE.md)**: Deploy to AWS Amplify / 部署到 AWS Amplify
+- **[AWS Deployment Guide](docs/AWS_DEPLOYMENT_GUIDE.md)**: Deploy to AWS Amplify / 部署到 AWS Amplify
 
 ---
 
