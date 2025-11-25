@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@media print {
+
+  .no-print,
+  aside,
+  button,
+  select,
+  input[type="checkbox"],
+  label {
+    display: none !important;
+  }
+
+  /* Ensure main content takes full width */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Ensure charts break pages correctly */
+  .test-item-group {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Show summary */
+  textarea {
+    border: none !important;
+    resize: none !important;
+  }
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
