@@ -541,7 +541,6 @@ function App() {
                   <option value="ALL">Show All</option>
                   <option value="PASS_ONLY">Pass Only</option>
                   <option value="FAIL_ONLY">Fail Only</option>
-                  <option value="ALL_PASS_ONLY">All Pass Units Only</option>
                 </select>
               </div>
               <label className="flex items-center gap-2 text-sm">
