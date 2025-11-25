@@ -159,29 +159,36 @@ function App() {
 
     const allSNs = Array.from(snSet);
 
-    // Track units (individual L or R channels)
-    const unitResults = new Map<string, boolean>(); // key: "SN_L" or "SN_R", value: pass/fail
+    // Track units (individual L or R channels, or single products)
+    const unitResults = new Map<string, boolean>(); // key: "SN_L" or "SN_R" or "SN", value: pass/fail
 
-    // For each SN and channel combination, check if all test items pass
+    // For each SN, check if all test items pass
     allSNs.forEach(sn => {
       // Check which channels exist for this SN
       const channels = new Set<string>();
       filteredItems.forEach(item => {
         const record = item.records.find(r => r.sn === sn);
-        if (record && record.channel) {
-          channels.add(record.channel);
+        if (record) {
+          if (record.channel) {
+            channels.add(record.channel);
+          } else {
+            channels.add(''); // Empty string for single-channel data
+          }
         }
       });
 
-      // For each channel, check if all test items pass
+      // For each channel (or single product), check if all test items pass
       channels.forEach(channel => {
-        const unitKey = `${sn}_${channel}`;
+        const unitKey = channel ? `${sn}_${channel}` : sn;
         let unitPasses = true;
 
         // Check each test item for this SN+channel
         for (const item of filteredItems) {
           // Find the record for this SN and channel
-          const record = item.records.find(r => r.sn === sn && r.channel === channel);
+          const record = channel
+            ? item.records.find(r => r.sn === sn && r.channel === channel)
+            : item.records.find(r => r.sn === sn);
+
           if (!record) continue;
 
           // Check if this test item has limits defined
@@ -674,27 +681,37 @@ function App() {
           <div className="mb-8 border-b pb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-800">Analysis Summary</h2>
 
-            {/* Unit Statistics (L or R individually) */}
+            {/* Unit Statistics */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2 text-gray-700">Unit Statistics (L/R Individual)</h3>
+              <h3 className="text-lg font-semibold mb-2 text-gray-700">
+                {statistics.sets.passed + statistics.sets.failed > 0
+                  ? 'Unit Statistics (L/R Individual)'
+                  : 'Product Statistics'}
+              </h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-gray-50 p-4 rounded-lg text-center">
                   <div className="text-2xl font-bold text-gray-800">
                     {statistics.units.total}
                   </div>
-                  <div className="text-sm text-gray-500">Total Units</div>
+                  <div className="text-sm text-gray-500">
+                    {statistics.sets.passed + statistics.sets.failed > 0 ? 'Total Units' : 'Total Products'}
+                  </div>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg text-center">
                   <div className="text-2xl font-bold text-green-600">
                     {statistics.units.passed}
                   </div>
-                  <div className="text-sm text-green-600">Passed Units</div>
+                  <div className="text-sm text-green-600">
+                    {statistics.sets.passed + statistics.sets.failed > 0 ? 'Passed Units' : 'Passed Products'}
+                  </div>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg text-center">
                   <div className="text-2xl font-bold text-red-600">
                     {statistics.units.failed}
                   </div>
-                  <div className="text-sm text-red-600">Failed Units</div>
+                  <div className="text-sm text-red-600">
+                    {statistics.sets.passed + statistics.sets.failed > 0 ? 'Failed Units' : 'Failed Products'}
+                  </div>
                 </div>
               </div>
             </div>
