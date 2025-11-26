@@ -16,16 +16,33 @@ export interface StatisticsResult {
 
 export class StatisticsService {
     static calculate(filteredItems: TestItem[], filterOptions: FilterOptions): StatisticsResult {
-        // When deduplicate is OFF, treat each record as a separate product (use rowId)
-        // When deduplicate is ON, group by SN (or SN_channel)
+        // unitResults: Used for "Unit Statistics" (depends on deduplicate flag)
+        const unitResults = new Map<string, boolean>();
 
-        const unitResults = new Map<string, boolean>(); // key: unit identifier, value: pass/fail
+        // latestStatusMap: Used for "Set Statistics" (always represents the latest status of physical units)
+        const latestStatusMap = new Map<string, boolean>();
 
-        // Store metadata for each key to avoid parsing issues with underscores in SN
-        const keyMeta = new Map<string, { sn: string, channel?: 'L' | 'R', rowId?: number }>();
+        // Helper to check if a record passes
+        const checkRecordPass = (record: any, item: TestItem) => {
+            let hasLimits = false;
+            if (record.type === 'single') {
+                hasLimits = record.upperLimit !== null || record.lowerLimit !== null;
+            } else {
+                hasLimits = record.data.some((d: any) => d.upperLimit !== null || d.lowerLimit !== null);
+            }
 
+            if (!hasLimits) return true; // No limits = Pass
+
+            return record.type === 'single'
+                ? record.result === 'PASS'
+                : record.overallResult === 'PASS';
+        };
+
+        // 1. Calculate Unit Statistics (based on deduplicate flag)
         if (!filterOptions.deduplicate) {
-            // Deduplicate OFF: Each record is a separate product
+            // Deduplicate OFF: Each record is a separate unit
+            const keyMeta = new Map<string, { sn: string, channel?: 'L' | 'R', rowId?: number }>();
+
             filteredItems.forEach(item => {
                 item.records.forEach(record => {
                     const productKey = record.channel
@@ -42,13 +59,11 @@ export class StatisticsService {
                 });
             });
 
-            // For each product (record instance), check if all test items pass
             keyMeta.forEach((meta, productKey) => {
                 const { sn, channel, rowId } = meta;
                 let productPasses = true;
 
                 for (const item of filteredItems) {
-                    // Find the specific record by rowId
                     const record = item.records.find(r =>
                         r.sn === sn &&
                         r.rowId === rowId &&
@@ -56,119 +71,82 @@ export class StatisticsService {
                     );
 
                     if (!record) continue;
-
-                    // Check if this test item has limits
-                    let hasLimits = false;
-                    if (record.type === 'single') {
-                        hasLimits = record.upperLimit !== null || record.lowerLimit !== null;
-                    } else {
-                        hasLimits = record.data.some(d => d.upperLimit !== null || d.lowerLimit !== null);
-                    }
-
-                    if (!hasLimits) continue;
-
-                    // Check if this test passes
-                    const itemPasses = record.type === 'single'
-                        ? record.result === 'PASS'
-                        : record.overallResult === 'PASS';
-
-                    if (!itemPasses) {
+                    if (!checkRecordPass(record, item)) {
                         productPasses = false;
                         break;
                     }
                 }
-
                 unitResults.set(productKey, productPasses);
-            });
-
-        } else {
-            // Deduplicate ON: Group by SN (or SN_channel)
-            filteredItems.forEach(item => {
-                item.records.forEach(record => {
-                    const unitKey = record.channel ? `${record.sn}_${record.channel}` : record.sn;
-                    if (!keyMeta.has(unitKey)) {
-                        keyMeta.set(unitKey, {
-                            sn: record.sn,
-                            channel: record.channel
-                        });
-                    }
-                });
-            });
-
-            keyMeta.forEach((meta, unitKey) => {
-                const { sn, channel } = meta;
-                let unitPasses = true;
-
-                for (const item of filteredItems) {
-                    // Find record for this unit in this test item
-                    // We want the LATEST record.
-                    const unitRecords = channel
-                        ? item.records.filter(r => r.sn === sn && r.channel === channel)
-                        : item.records.filter(r => r.sn === sn);
-
-                    const record = unitRecords.length > 0 ? unitRecords[unitRecords.length - 1] : undefined;
-
-                    if (!record) continue;
-
-                    let hasLimits = false;
-                    if (record.type === 'single') {
-                        hasLimits = record.upperLimit !== null || record.lowerLimit !== null;
-                    } else {
-                        hasLimits = record.data.some(d => d.upperLimit !== null || d.lowerLimit !== null);
-                    }
-
-                    if (!hasLimits) continue;
-
-                    const itemPasses = record.type === 'single'
-                        ? record.result === 'PASS'
-                        : record.overallResult === 'PASS';
-
-                    if (!itemPasses) {
-                        unitPasses = false;
-                        break;
-                    }
-                }
-
-                unitResults.set(unitKey, unitPasses);
             });
         }
 
-        // Calculate unit statistics
+        // 2. Calculate Latest Status for Set Statistics (and for Unit Stats if Dedup is ON)
+        // We need to identify all unique SN/Channel pairs and find their latest record
+        const uniqueUnits = new Map<string, { sn: string, channel?: 'L' | 'R' }>();
+
+        filteredItems.forEach(item => {
+            item.records.forEach(record => {
+                const unitKey = record.channel ? `${record.sn}_${record.channel}` : record.sn;
+                if (!uniqueUnits.has(unitKey)) {
+                    uniqueUnits.set(unitKey, { sn: record.sn, channel: record.channel });
+                }
+            });
+        });
+
+        uniqueUnits.forEach((meta, unitKey) => {
+            const { sn, channel } = meta;
+            let unitPasses = true;
+
+            for (const item of filteredItems) {
+                // Find LATEST record for this unit in this test item
+                const unitRecords = channel
+                    ? item.records.filter(r => r.sn === sn && r.channel === channel)
+                    : item.records.filter(r => r.sn === sn);
+
+                const record = unitRecords.length > 0 ? unitRecords[unitRecords.length - 1] : undefined;
+
+                if (!record) continue;
+                if (!checkRecordPass(record, item)) {
+                    unitPasses = false;
+                    break;
+                }
+            }
+            latestStatusMap.set(unitKey, unitPasses);
+        });
+
+        // If Deduplicate is ON, Unit Stats = Latest Stats
+        if (filterOptions.deduplicate) {
+            latestStatusMap.forEach((val, key) => unitResults.set(key, val));
+        }
+
+        // 3. Calculate Final Counts
         const unitsPassed = Array.from(unitResults.values()).filter(p => p).length;
         const unitsFailed = Array.from(unitResults.values()).filter(p => !p).length;
 
-        // Calculate set statistics (only relevant when deduplicate is ON and L/R channels exist)
+        // Calculate set statistics using latestStatusMap (Always calculated)
         let setsPassed = 0;
         let setsFailed = 0;
-        let totalSNs = 0;
 
-        if (filterOptions.deduplicate) {
-            const snSet = new Set<string>();
-            filteredItems.forEach(item => {
-                item.records.forEach(record => {
-                    snSet.add(record.sn);
-                });
-            });
-            totalSNs = snSet.size;
+        const snSet = new Set<string>();
+        filteredItems.forEach(item => {
+            item.records.forEach(record => snSet.add(record.sn));
+        });
 
-            Array.from(snSet).forEach(sn => {
-                const lPasses = unitResults.get(`${sn}_L`);
-                const rPasses = unitResults.get(`${sn}_R`);
+        Array.from(snSet).forEach(sn => {
+            const lPasses = latestStatusMap.get(`${sn}_L`);
+            const rPasses = latestStatusMap.get(`${sn}_R`);
 
-                if (lPasses !== undefined && rPasses !== undefined) {
-                    if (lPasses && rPasses) {
-                        setsPassed++;
-                    } else {
-                        setsFailed++;
-                    }
+            if (lPasses !== undefined && rPasses !== undefined) {
+                if (lPasses && rPasses) {
+                    setsPassed++;
+                } else {
+                    setsFailed++;
                 }
-            });
-        } else {
-            totalSNs = unitResults.size; // When not deduplicating, each "unit" is a unique product instance
-        }
+            }
+        });
 
         return {
-            total: totalSNs,
+            total: filterOptions.deduplicate ? snSet.size : unitResults.size,
             units: {
                 total: unitResults.size,
                 passed: unitsPassed,

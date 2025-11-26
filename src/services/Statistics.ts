@@ -87,15 +87,15 @@ export class Statistics {
         sortedFreqs.forEach(freq => {
             const entry = freqMap.get(freq)!;
 
-            // Only calculate CPK if at least one limit is defined
-            const hasLimits = entry.upper !== null || entry.lower !== null;
+            // Only calculate CPK if at least one limit is defined and is a valid number
+            const hasLimits = (entry.upper !== null && entry.upper !== undefined) || (entry.lower !== null && entry.lower !== undefined);
             const cpk = hasLimits ? this.calculateCPK(entry.values, entry.upper, entry.lower) : null;
 
             const mean = this.calculateMean(entry.values);
             const stdDev = this.calculateStdDev(entry.values, mean);
 
-            // Only include in results if limits exist
-            if (hasLimits) {
+            // Only include in results if limits exist and CPK is valid number
+            if (hasLimits && cpk !== null && !isNaN(cpk)) {
                 result.push({ frequency: freq, cpk, stdDev });
             }
         });
