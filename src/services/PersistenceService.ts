@@ -26,7 +26,7 @@ export class PersistenceService {
         testMetadata: Array<{ key: string, value: string }>
     ) {
         const state: ProjectState = {
-            version: 1,
+            version: 2,
             timestamp: Date.now(),
             items,
             comments,
