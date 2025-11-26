@@ -19,7 +19,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, sidebar }) => {
                     {sidebar}
                 </div>
                 <div className="p-4 border-t text-xs text-gray-500 text-center">
-                    v1.0.0
+                    v0.2.0
                 </div>
             </aside>
 
