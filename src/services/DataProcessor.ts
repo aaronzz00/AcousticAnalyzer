@@ -64,20 +64,52 @@ export class DataProcessor {
     }
 
     private static mergeChannelItems(items: TestItem[]): TestItem[] {
-        // When merging channels, treat L and R as separate products
-        // This means we keep the records separate but remove the channel identifier from the item level
-        return items.map(item => {
-            if (!item.channel) {
-                return item;
-            }
+        // Group items by name (without channel suffix)
+        const groupMap = new Map<string, TestItem[]>();
 
-            // Keep records with their channel info, but remove channel from item
-            // Each L/R will be counted separately in statistics
-            return {
-                ...item,
-                records: item.records
-            };
+        items.forEach(item => {
+            // Extract base name without channel suffix (_L or _R)
+            const baseName = item.name;
+
+            if (!groupMap.has(baseName)) {
+                groupMap.set(baseName, []);
+            }
+            groupMap.get(baseName)!.push(item);
         });
+
+        const mergedItems: TestItem[] = [];
+
+        groupMap.forEach((group, baseName) => {
+            if (group.length === 1) {
+                // No merging needed, single channel item
+                mergedItems.push(group[0]);
+            } else {
+                // Merge L and R channels into one item
+                const lItem = group.find(item => item.channel === 'L');
+                const rItem = group.find(item => item.channel === 'R');
+
+                if (lItem && rItem) {
+                    // Combine all records from both channels, removing channel info
+                    const combinedRecords = [
+                        ...lItem.records.map(r => ({ ...r, channel: undefined })),
+                        ...rItem.records.map(r => ({ ...r, channel: undefined }))
+                    ];
+
+                    mergedItems.push({
+                        id: baseName.replace(/[^a-zA-Z0-9]/g, '_'),
+                        name: baseName,
+                        isMulti: lItem.isMulti,
+                        records: combinedRecords,
+                        channel: undefined
+                    });
+                } else {
+                    // Only one channel exists, keep as is
+                    mergedItems.push(...group);
+                }
+            }
+        });
+
+        return mergedItems;
     }
 
     private static filterRecords(items: TestItem[], type: 'ALL' | 'PASS_ONLY' | 'FAIL_ONLY', deduplicate: boolean): TestItem[] {
