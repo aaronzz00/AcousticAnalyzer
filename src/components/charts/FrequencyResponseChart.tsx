@@ -122,7 +122,8 @@ export const FrequencyResponseChart: React.FC<FrequencyResponseChartProps> = Rea
             </div>
         );
     }, (prevProps, nextProps) => {
-        // Custom comparison function
+        // Custom comparison function - Allow re-render if item.records change (filter changes)
         return prevProps.item.id === nextProps.item.id &&
+            prevProps.item.records.length === nextProps.item.records.length &&
             JSON.stringify(prevProps.layout) === JSON.stringify(nextProps.layout);
     });

@@ -112,6 +112,8 @@ export const CPKLineChart: React.FC<CPKLineChartProps> = React.memo(({ item, lay
         </div>
     );
 }, (prevProps, nextProps) => {
+    // Allow re-render if item.records change (filter changes)
     return prevProps.item.id === nextProps.item.id &&
+        prevProps.item.records.length === nextProps.item.records.length &&
         JSON.stringify(prevProps.layout) === JSON.stringify(nextProps.layout);
 });

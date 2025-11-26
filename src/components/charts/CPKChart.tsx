@@ -55,7 +55,7 @@ export const CPKChart: React.FC<CPKChartProps> = React.memo(({ item, layout: sav
             showlegend: true,
             margin: { l: 40, r: 20, t: 20, b: 30 },
             xaxis: { title: { text: 'Value' }, autorange: true },
-            yaxis: { title: { text: 'Probability Density' }, autorange: true },
+            yaxis: { title: { text: 'Count' }, autorange: true },
             shapes: [
                 ...(lower !== null ? [{
                     type: 'line' as const, x0: lower, x1: lower, y0: 0, y1: 1, xref: 'x' as const, yref: 'paper' as const,
@@ -96,10 +96,10 @@ export const CPKChart: React.FC<CPKChartProps> = React.memo(({ item, layout: sav
                             {
                                 x: values,
                                 type: 'histogram',
-                                histnorm: 'probability density',
                                 name: 'Data',
                                 opacity: 0.7,
-                                marker: { color: 'blue' }
+                                marker: { color: 'blue' },
+                                autobinx: true
                             },
                             {
                                 x: x,
@@ -151,6 +151,8 @@ export const CPKChart: React.FC<CPKChartProps> = React.memo(({ item, layout: sav
         );
     }
 }, (prevProps, nextProps) => {
+    // Allow re-render if item.records change (filter changes)
     return prevProps.item.id === nextProps.item.id &&
+        prevProps.item.records.length === nextProps.item.records.length &&
         JSON.stringify(prevProps.layout) === JSON.stringify(nextProps.layout);
 });
