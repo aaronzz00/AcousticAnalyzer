@@ -132,7 +132,7 @@ npm run build
 - **Styling / 样式**: Tailwind CSS 4.1
 - **Charts / 图表**: Plotly.js 3.3 (React-Plotly.js)
 - **Excel Parsing / Excel 解析**: SheetJS (xlsx)
-- **PDF Export / PDF 导出**: jsPDF + html2canvas
+- **PDF Export / PDF 导出**: Browser Native Print / 浏览器原生打印
 - **State Management / 状态管理**: React Hooks (useState, useMemo, useCallback)
 
 ---
@@ -148,8 +148,8 @@ The easiest way to deploy AcousticAnalyzer is using AWS Amplify:
 2. Connect repository to AWS Amplify / 将仓库连接到 AWS Amplify
 3. Amplify automatically builds and deploys / Amplify 自动构建和部署
 
-See [AWS Deployment Guide](.gemini/antigravity/brain/*/AWS_DEPLOYMENT_GUIDE.md) for detailed instructions.  
-查看 [AWS 部署指南](.gemini/antigravity/brain/*/AWS_DEPLOYMENT_GUIDE.md) 获取详细说明。
+See [AWS Deployment Guide](docs/AWS_DEPLOYMENT_GUIDE.md) for detailed instructions.  
+查看 [AWS 部署指南](docs/AWS_DEPLOYMENT_GUIDE.md) 获取详细说明。
 
 ### Manual Deployment / 手动部署
 
