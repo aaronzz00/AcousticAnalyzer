@@ -22,6 +22,7 @@ function App() {
   const [visibility, setVisibility] = useState<Record<string, boolean>>({});
   const [summary, setSummary] = useState<string>('');
   const [reportTitle, setReportTitle] = useState<string>('Acoustic Test Report');
+
   const [chartLayouts, setChartLayouts] = useState<Record<string, any>>({});
   const [isAnalysisMode, setIsAnalysisMode] = useState(false);
 

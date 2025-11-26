@@ -28,7 +28,7 @@ export class DataProcessor {
         }
 
         // 3. Filtering
-        processedItems = this.filterRecords(processedItems, options.filterType);
+        processedItems = this.filterRecords(processedItems, options.filterType, options.deduplicate);
 
         return processedItems;
     }
@@ -80,15 +80,120 @@ export class DataProcessor {
         });
     }
 
-    private static filterRecords(items: TestItem[], type: 'ALL' | 'PASS_ONLY' | 'FAIL_ONLY'): TestItem[] {
+    private static filterRecords(items: TestItem[], type: 'ALL' | 'PASS_ONLY' | 'FAIL_ONLY', deduplicate: boolean): TestItem[] {
         if (type === 'ALL') return items;
 
+        // Build a map of product/unit pass/fail status based on ALL test items
+        const unitStatus = new Map<string, boolean>(); // key: product identifier, value: true if all tests pass
+
+        if (!deduplicate) {
+            // Deduplicate OFF: Each record is a separate product (use rowId)
+            const allProducts = new Set<string>();
+            items.forEach(item => {
+                item.records.forEach(record => {
+                    const productKey = record.channel
+                        ? `${record.sn}_${record.channel}_${record.rowId}`
+                        : `${record.sn}_${record.rowId}`;
+                    allProducts.add(productKey);
+                });
+            });
+
+            // For each product, check if ALL test items pass
+            allProducts.forEach(productKey => {
+                const parts = productKey.split('_');
+                const rowId = parseInt(parts[parts.length - 1]);
+                const channel = parts.length === 3 ? parts[1] : undefined;
+                const sn = parts[0];
+
+                let productPasses = true;
+
+                for (const item of items) {
+                    const record = item.records.find(r =>
+                        r.sn === sn &&
+                        r.rowId === rowId &&
+                        (channel ? r.channel === channel : true)
+                    );
+
+                    if (!record) continue;
+
+                    // Check if this test item has limits
+                    let hasLimits = false;
+                    if (record.type === 'single') {
+                        hasLimits = record.upperLimit !== null || record.lowerLimit !== null;
+                    } else {
+                        hasLimits = record.data.some(d => d.upperLimit !== null || d.lowerLimit !== null);
+                    }
+
+                    if (!hasLimits) continue;
+
+                    // Check if this test passes
+                    const testPasses = this.isFail(record) === false;
+                    if (!testPasses) {
+                        productPasses = false;
+                        break;
+                    }
+                }
+
+                unitStatus.set(productKey, productPasses);
+            });
+
+        } else {
+            // Deduplicate ON: Group by SN (or SN_channel)
+            const allUnits = new Set<string>();
+            items.forEach(item => {
+                item.records.forEach(record => {
+                    const unitKey = record.channel ? `${record.sn}_${record.channel}` : record.sn;
+                    allUnits.add(unitKey);
+                });
+            });
+
+            // For each unit, check if ALL test items (with limits) pass
+            allUnits.forEach(unitKey => {
+                let unitPasses = true;
+
+                for (const item of items) {
+                    // Find record for this unit in this test item
+                    const [sn, channel] = unitKey.includes('_') ? unitKey.split('_') : [unitKey, undefined];
+                    const record = channel
+                        ? item.records.find(r => r.sn === sn && r.channel === channel)
+                        : item.records.find(r => r.sn === sn);
+
+                    if (!record) continue;
+
+                    // Check if this test item has limits
+                    let hasLimits = false;
+                    if (record.type === 'single') {
+                        hasLimits = record.upperLimit !== null || record.lowerLimit !== null;
+                    } else {
+                        hasLimits = record.data.some(d => d.upperLimit !== null || d.lowerLimit !== null);
+                    }
+
+                    if (!hasLimits) continue;
+
+                    // Check if this test passes
+                    const testPasses = this.isFail(record) === false;
+                    if (!testPasses) {
+                        unitPasses = false;
+                        break;
+                    }
+                }
+
+                unitStatus.set(unitKey, unitPasses);
+            });
+        }
+
+        // Filter records based on product/unit pass/fail status
         return items.map(item => ({
             ...item,
             records: item.records.filter(record => {
-                const isFail = this.isFail(record);
-                if (type === 'PASS_ONLY') return !isFail;
-                if (type === 'FAIL_ONLY') return isFail;
+                const productKey = deduplicate
+                    ? (record.channel ? `${record.sn}_${record.channel}` : record.sn)
+                    : (record.channel ? `${record.sn}_${record.channel}_${record.rowId}` : `${record.sn}_${record.rowId}`);
+
+                const passes = unitStatus.get(productKey) ?? true;
+
+                if (type === 'PASS_ONLY') return passes;
+                if (type === 'FAIL_ONLY') return !passes;
                 return true;
             })
         }));

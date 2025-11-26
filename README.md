@@ -1,6 +1,6 @@
 # AcousticAnalyzer
 
-**Version**: v0.1  
+**Version**: v0.2  
 **A professional web-based acoustic test data analysis tool** / **专业的声学测试数据分析网页工具**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
@@ -20,7 +20,7 @@ AcousticAnalyzer 是一个强大的基于 Web 的声学测试数据分析工具�
 - ✅ **Multi-file Support** / **多文件支持**: Upload and merge multiple Excel files
 - 📊 **Interactive Charts** / **交互式图表**: Frequency response, CPK trends, histograms, and pie charts
 - 📈 **Advanced Statistics** / **高级统计**: Unit-level and Set-level pass/fail analysis for L/R channels
-- 🔍 **Flexible Filtering** / **灵活筛选**: Deduplicate, Pass/Fail filters, channel merging
+- 🔍 **Flexible Filtering** / **灵活筛选**: Deduplicate, Pass/Fail filters with product-level logic, channel merging
 - 💾 **Project Management** / **项目管理**: Save and load complete analysis sessions
 - 📄 **Report Export** / **报告导出**: Export as PDF or standalone HTML
 - ⚡ **Performance Optimized** / **性能优化**: Lazy loading, debouncing, and memoization
@@ -205,4 +205,17 @@ This project is licensed under the MIT License.
 
 ---
 
-**Version / 版本**: v0.1 (November 2025)
+## 📦 What's New in v0.2
+
+### New Features / 新功能
+- **Improved Filtering Logic** / **改进的筛选逻辑**: Product/unit-level filtering (Pass Only shows only products where ALL tests pass)
+- **Deduplicate-aware Statistics** / **支持去重的统计**: When deduplicate is OFF, each record is counted as a separate product
+
+### Bug Fixes / 错误修复
+- Fixed filter inconsistencies when deduplicate is enabled/disabled
+- Fixed statistics calculation for single-channel data
+- Removed "All Pass Units Only" filter (redundant with improved Pass Only logic)
+
+---
+
+**Version / 版本**: v0.2 (November 2025)
