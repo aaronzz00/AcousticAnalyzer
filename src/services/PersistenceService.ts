@@ -11,6 +11,7 @@ export interface ProjectState {
     summary?: string;
     reportTitle?: string;
     chartLayouts?: Record<string, any>;
+    testMetadata?: Array<{ key: string, value: string }>;
 }
 
 export class PersistenceService {
@@ -21,7 +22,8 @@ export class PersistenceService {
         filterOptions: FilterOptions,
         summary: string,
         chartLayouts: Record<string, any>,
-        reportTitle: string
+        reportTitle: string,
+        testMetadata: Array<{ key: string, value: string }>
     ) {
         const state: ProjectState = {
             version: 1,
@@ -32,7 +34,8 @@ export class PersistenceService {
             filterOptions,
             summary,
             reportTitle,
-            chartLayouts
+            chartLayouts,
+            testMetadata
         };
 
         const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });

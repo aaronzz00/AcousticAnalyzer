@@ -86,25 +86,30 @@ export class DataProcessor {
         // Build a map of product/unit pass/fail status based on ALL test items
         const unitStatus = new Map<string, boolean>(); // key: product identifier, value: true if all tests pass
 
+        // Store metadata for each key to avoid parsing issues with underscores in SN
+        const keyMeta = new Map<string, { sn: string, channel?: 'L' | 'R', rowId?: number }>();
+
         if (!deduplicate) {
             // Deduplicate OFF: Each record is a separate product (use rowId)
-            const allProducts = new Set<string>();
             items.forEach(item => {
                 item.records.forEach(record => {
                     const productKey = record.channel
                         ? `${record.sn}_${record.channel}_${record.rowId}`
                         : `${record.sn}_${record.rowId}`;
-                    allProducts.add(productKey);
+
+                    if (!keyMeta.has(productKey)) {
+                        keyMeta.set(productKey, {
+                            sn: record.sn,
+                            channel: record.channel,
+                            rowId: record.rowId
+                        });
+                    }
                 });
             });
 
             // For each product, check if ALL test items pass
-            allProducts.forEach(productKey => {
-                const parts = productKey.split('_');
-                const rowId = parseInt(parts[parts.length - 1]);
-                const channel = parts.length === 3 ? parts[1] : undefined;
-                const sn = parts[0];
-
+            keyMeta.forEach((meta, productKey) => {
+                const { sn, channel, rowId } = meta;
                 let productPasses = true;
 
                 for (const item of items) {
@@ -139,24 +144,31 @@ export class DataProcessor {
 
         } else {
             // Deduplicate ON: Group by SN (or SN_channel)
-            const allUnits = new Set<string>();
             items.forEach(item => {
                 item.records.forEach(record => {
                     const unitKey = record.channel ? `${record.sn}_${record.channel}` : record.sn;
-                    allUnits.add(unitKey);
+                    if (!keyMeta.has(unitKey)) {
+                        keyMeta.set(unitKey, {
+                            sn: record.sn,
+                            channel: record.channel
+                        });
+                    }
                 });
             });
 
             // For each unit, check if ALL test items (with limits) pass
-            allUnits.forEach(unitKey => {
+            keyMeta.forEach((meta, unitKey) => {
+                const { sn, channel } = meta;
                 let unitPasses = true;
 
                 for (const item of items) {
                     // Find record for this unit in this test item
-                    const [sn, channel] = unitKey.includes('_') ? unitKey.split('_') : [unitKey, undefined];
-                    const record = channel
-                        ? item.records.find(r => r.sn === sn && r.channel === channel)
-                        : item.records.find(r => r.sn === sn);
+                    // We want the LATEST record.
+                    const unitRecords = channel
+                        ? item.records.filter(r => r.sn === sn && r.channel === channel)
+                        : item.records.filter(r => r.sn === sn);
+
+                    const record = unitRecords.length > 0 ? unitRecords[unitRecords.length - 1] : undefined;
 
                     if (!record) continue;
 

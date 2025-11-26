@@ -10,6 +10,7 @@ import { CPKLineChart } from './components/charts/CPKLineChart';
 import { ExcelParser } from './services/ExcelParser';
 import type { TestItem } from './types';
 import { DataProcessor, type FilterOptions } from './services/DataProcessor';
+import { StatisticsService } from './services/StatisticsService';
 import { PersistenceService } from './services/PersistenceService';
 import { Download, Filter, Save, Upload, EyeOff, Plus, Play } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -22,6 +23,15 @@ function App() {
   const [visibility, setVisibility] = useState<Record<string, boolean>>({});
   const [summary, setSummary] = useState<string>('');
   const [reportTitle, setReportTitle] = useState<string>('Acoustic Test Report');
+
+  // Test metadata fields
+  const [testMetadata, setTestMetadata] = useState<Array<{ key: string, value: string }>>([
+    { key: 'Project Name', value: '' },
+    { key: 'Product Stage', value: '' },
+    { key: 'Hardware Config', value: '' },
+    { key: 'Firmware Config', value: '' },
+    { key: 'Test Time', value: '' }
+  ]);
 
   const [chartLayouts, setChartLayouts] = useState<Record<string, any>>({});
   const [isAnalysisMode, setIsAnalysisMode] = useState(false);
@@ -150,109 +160,8 @@ function App() {
 
   // Memoize unit and set level statistics calculations
   const statistics = useMemo(() => {
-    // Get all unique SNs across all test items
-    const snSet = new Set<string>();
-    filteredItems.forEach(item => {
-      item.records.forEach(record => {
-        snSet.add(record.sn);
-      });
-    });
-
-    const allSNs = Array.from(snSet);
-
-    // Track units (individual L or R channels, or single products)
-    const unitResults = new Map<string, boolean>(); // key: "SN_L" or "SN_R" or "SN", value: pass/fail
-
-    // For each SN, check if all test items pass
-    allSNs.forEach(sn => {
-      // Check which channels exist for this SN
-      const channels = new Set<string>();
-      filteredItems.forEach(item => {
-        const record = item.records.find(r => r.sn === sn);
-        if (record) {
-          if (record.channel) {
-            channels.add(record.channel);
-          } else {
-            channels.add(''); // Empty string for single-channel data
-          }
-        }
-      });
-
-      // For each channel (or single product), check if all test items pass
-      channels.forEach(channel => {
-        const unitKey = channel ? `${sn}_${channel}` : sn;
-        let unitPasses = true;
-
-        // Check each test item for this SN+channel
-        for (const item of filteredItems) {
-          // Find the record for this SN and channel
-          const record = channel
-            ? item.records.find(r => r.sn === sn && r.channel === channel)
-            : item.records.find(r => r.sn === sn);
-
-          if (!record) continue;
-
-          // Check if this test item has limits defined
-          let hasLimits = false;
-          if (record.type === 'single') {
-            hasLimits = record.upperLimit !== null || record.lowerLimit !== null;
-          } else {
-            hasLimits = record.data.some(d => d.upperLimit !== null || d.lowerLimit !== null);
-          }
-
-          // If no limits, ignore this test item
-          if (!hasLimits) continue;
-
-          // Check if this test item passes
-          const itemPasses = record.type === 'single'
-            ? record.result === 'PASS'
-            : record.overallResult === 'PASS';
-
-          if (!itemPasses) {
-            unitPasses = false;
-            break;
-          }
-        }
-
-        unitResults.set(unitKey, unitPasses);
-      });
-    });
-
-    // Calculate unit statistics
-    const unitsPassed = Array.from(unitResults.values()).filter(p => p).length;
-    const unitsFailed = Array.from(unitResults.values()).filter(p => !p).length;
-
-    // Calculate set statistics (both L and R must pass for the same SN)
-    let setsPassed = 0;
-    let setsFailed = 0;
-
-    allSNs.forEach(sn => {
-      const lPasses = unitResults.get(`${sn}_L`);
-      const rPasses = unitResults.get(`${sn}_R`);
-
-      // Only count as a set if both L and R exist
-      if (lPasses !== undefined && rPasses !== undefined) {
-        if (lPasses && rPasses) {
-          setsPassed++;
-        } else {
-          setsFailed++;
-        }
-      }
-    });
-
-    return {
-      total: allSNs.length,
-      units: {
-        total: unitResults.size,
-        passed: unitsPassed,
-        failed: unitsFailed
-      },
-      sets: {
-        passed: setsPassed,
-        failed: setsFailed
-      }
-    };
-  }, [filteredItems]);
+    return StatisticsService.calculate(filteredItems, filterOptions);
+  }, [filteredItems, filterOptions]);
 
   const [exportingIndex, setExportingIndex] = useState<number | null>(null);
   const pdfDocRef = useRef<jsPDF | null>(null);
@@ -591,6 +500,13 @@ function App() {
                     setSummary(state.summary || '');
                     setReportTitle(state.reportTitle || 'Acoustic Test Report');
                     setChartLayouts(state.chartLayouts || {});
+                    setTestMetadata(state.testMetadata || [
+                      { key: 'Project Name', value: '' },
+                      { key: 'Product Stage', value: '' },
+                      { key: 'Hardware Config', value: '' },
+                      { key: 'Firmware Config', value: '' },
+                      { key: 'Test Time', value: '' }
+                    ]);
                     setIsAnalysisMode(true);
                     const processed = DataProcessor.process(state.items, state.filterOptions);
                     setFilteredItems(processed);
@@ -604,7 +520,7 @@ function App() {
           {isAnalysisMode && (
             <>
               <button
-                onClick={() => PersistenceService.saveProject(items, comments, visibility, filterOptions, summary, chartLayouts, reportTitle)}
+                onClick={() => PersistenceService.saveProject(items, comments, visibility, filterOptions, summary, chartLayouts, reportTitle, testMetadata)}
                 className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
               >
                 <Save className="w-4 h-4" /> Save Project
@@ -675,6 +591,58 @@ function App() {
               className="text-3xl font-bold text-gray-900 w-full border-b-2 border-transparent hover:border-gray-300 focus:border-indigo-500 focus:outline-none transition-colors text-center"
               placeholder="Report Title"
             />
+          </div>
+
+          {/* Test Information (Metadata) */}
+          <div className="mb-8 border-b pb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Test Information</h2>
+              <button
+                onClick={() => setTestMetadata([...testMetadata, { key: '', value: '' }])}
+                className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1 no-print"
+              >
+                <Plus className="w-4 h-4" /> Add Field
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+              {testMetadata.map((field, index) => (
+                <div key={index} className="flex gap-2 items-center group">
+                  <input
+                    type="text"
+                    value={field.key}
+                    onChange={(e) => {
+                      const newMetadata = [...testMetadata];
+                      newMetadata[index].key = e.target.value;
+                      setTestMetadata(newMetadata);
+                    }}
+                    className="w-1/3 font-semibold text-gray-700 border-b border-transparent hover:border-gray-300 focus:border-indigo-500 focus:outline-none bg-transparent text-right"
+                    placeholder="Field Name"
+                  />
+                  <span className="text-gray-400">:</span>
+                  <input
+                    type="text"
+                    value={field.value}
+                    onChange={(e) => {
+                      const newMetadata = [...testMetadata];
+                      newMetadata[index].value = e.target.value;
+                      setTestMetadata(newMetadata);
+                    }}
+                    className="flex-1 text-gray-900 border-b border-transparent hover:border-gray-300 focus:border-indigo-500 focus:outline-none bg-transparent"
+                    placeholder="Value"
+                  />
+                  <button
+                    onClick={() => {
+                      const newMetadata = testMetadata.filter((_, i) => i !== index);
+                      setTestMetadata(newMetadata);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity no-print"
+                    title="Remove Field"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Summary Section */}
