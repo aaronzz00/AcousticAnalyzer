@@ -1,18 +1,20 @@
-# AcousticAnalyzer User Manual / 使用手册
+# AcousticAnalyzer User Manual  
+# AcousticAnalyzer 用户手册
 
-**Version / 版本**: v0.1  
-**Last Updated / 最后更新**: 2025-11-25
+**Version / 版本**: v0.2  
+**Last Updated / 最后更新**: November 2025
 
 ---
 
-## 📖 Table of Contents / 目录
+## Table of Contents / 目录
 
-1. [Quick Start / 快速开始](#quick-start--快速开始)
-2. [File Upload / 文件上传](#file-upload--文件上传)
-3. [Data Analysis / 数据分析](#data-analysis--数据分析)
-4. [Filtering / 筛选功能](#filtering--筛选功能)
-5. [Charts / 图表查看](#charts--图表查看)
-6. [Statistics / 统计数据](#statistics--统计数据)
+**English**
+1. [Introduction](#introduction)
+2. [Getting Started](#getting-started)
+3. [Data Upload and File Format](#data-upload-and-file-format)
+4. [Filtering and Analysis Options](#filtering-and-analysis-options)
+5. [Understanding the Report](#understanding-the-report)
+6. [Charts and Visualizations](#charts-and-visualizations)tics / 统计数据](#statistics--统计数据)
 7. [Report Export / 报告导出](#report-export--报告导出)
 8. [Project Management / 项目管理](#project-management--项目管理)
 9. [FAQ / 常见问题](#faq--常见问题)
