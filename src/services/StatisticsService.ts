@@ -23,7 +23,7 @@ export class StatisticsService {
         const latestStatusMap = new Map<string, boolean>();
 
         // Helper to check if a record passes
-        const checkRecordPass = (record: any, item: TestItem) => {
+        const checkRecordPass = (record: any) => {
             let hasLimits = false;
             if (record.type === 'single') {
                 hasLimits = record.upperLimit !== null || record.lowerLimit !== null;
@@ -71,7 +71,7 @@ export class StatisticsService {
                     );
 
                     if (!record) continue;
-                    if (!checkRecordPass(record, item)) {
+                    if (!checkRecordPass(record)) {
                         productPasses = false;
                         break;
                     }
@@ -106,7 +106,7 @@ export class StatisticsService {
                 const record = unitRecords.length > 0 ? unitRecords[unitRecords.length - 1] : undefined;
 
                 if (!record) continue;
-                if (!checkRecordPass(record, item)) {
+                if (!checkRecordPass(record)) {
                     unitPasses = false;
                     break;
                 }
@@ -123,26 +123,72 @@ export class StatisticsService {
         const unitsPassed = Array.from(unitResults.values()).filter(p => p).length;
         const unitsFailed = Array.from(unitResults.values()).filter(p => !p).length;
 
-        // Calculate set statistics using latestStatusMap (Always calculated)
+        // Calculate set statistics
         let setsPassed = 0;
         let setsFailed = 0;
 
+        if (!filterOptions.deduplicate) {
+            // When deduplicate is OFF, match L/R pairs by SN+rowId
+            // Find all unique SN+rowId combinations from unitResults keys
+            const snRowIdPairs = new Set<string>(); // Format: "SN_rowId"
+
+            unitResults.forEach((_, key) => {
+                // Extract SN and rowId from keys like "SN_L_rowId" or "SN_R_rowId" or "SN_rowId"
+                const parts = key.split('_');
+                if (parts.length >= 2) {
+                    const rowId = parts[parts.length - 1];
+                    const channel = parts.length === 3 ? parts[1] : null;
+
+                    if (channel === 'L' || channel === 'R') {
+                        // Dual channel case: "SN_L_rowId" -> "SN_rowId"
+                        const sn = parts[0];
+                        snRowIdPairs.add(`${sn}_${rowId}`);
+                    }
+                }
+            });
+
+            // For each SN+rowId pair, check if both L and R exist
+            snRowIdPairs.forEach(pair => {
+                const [sn, rowId] = pair.split('_');
+                const lKey = `${sn}_L_${rowId}`;
+                const rKey = `${sn}_R_${rowId}`;
+
+                const lPasses = unitResults.get(lKey);
+                const rPasses = unitResults.get(rKey);
+
+                if (lPasses !== undefined && rPasses !== undefined) {
+                    if (lPasses && rPasses) {
+                        setsPassed++;
+                    } else {
+                        setsFailed++;
+                    }
+                }
+            });
+        } else {
+            // When deduplicate is ON, use latestStatusMap grouped by SN only
+            const snSet = new Set<string>();
+            filteredItems.forEach(item => {
+                item.records.forEach(record => snSet.add(record.sn));
+            });
+
+            Array.from(snSet).forEach(sn => {
+                const lPasses = latestStatusMap.get(`${sn}_L`);
+                const rPasses = latestStatusMap.get(`${sn}_R`);
+
+                if (lPasses !== undefined && rPasses !== undefined) {
+                    if (lPasses && rPasses) {
+                        setsPassed++;
+                    } else {
+                        setsFailed++;
+                    }
+                }
+            });
+        }
+
+        // Calculate total SNs for the 'total' field
         const snSet = new Set<string>();
         filteredItems.forEach(item => {
             item.records.forEach(record => snSet.add(record.sn));
-        });
-
-        Array.from(snSet).forEach(sn => {
-            const lPasses = latestStatusMap.get(`${sn}_L`);
-            const rPasses = latestStatusMap.get(`${sn}_R`);
-
-            if (lPasses !== undefined && rPasses !== undefined) {
-                if (lPasses && rPasses) {
-                    setsPassed++;
-                } else {
-                    setsFailed++;
-                }
-            }
         });
 
         return {
