@@ -1,6 +1,6 @@
 # AcousticAnalyzer
 
-**Version**: v0.2  
+**Version**: v0.3  
 **A professional web-based acoustic test data analysis tool** / **专业的声学测试数据分析网页工具**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
@@ -205,17 +205,17 @@ This project is licensed under the MIT License.
 
 ---
 
-## 📦 What's New in v0.2
+## 📦 What's New in v0.3
 
 ### New Features / 新功能
-- **Improved Filtering Logic** / **改进的筛选逻辑**: Product/unit-level filtering (Pass Only shows only products where ALL tests pass)
-- **Deduplicate-aware Statistics** / **支持去重的统计**: When deduplicate is OFF, each record is counted as a separate product
+- **UI Enhancements** / **界面增强**: Modernized Home Screen layout with improved button placement and compact upload area.
+- **Separate L/R Statistics** / **独立 L/R 统计**: Displays individual statistics for L and R channels when merging is disabled.
+- **Help Integration** / **帮助集成**: Added direct link to User Manual from the interface.
 
 ### Bug Fixes / 错误修复
-- Fixed filter inconsistencies when deduplicate is enabled/disabled
-- Fixed statistics calculation for single-channel data
-- Removed "All Pass Units Only" filter (redundant with improved Pass Only logic)
+- Fixed statistics calculation logic for merged/unmerged channels.
+- Improved responsiveness of file upload component.
 
 ---
 
-**Version / 版本**: v0.2 (November 2025)
+**Version / 版本**: v0.3 (November 2025)

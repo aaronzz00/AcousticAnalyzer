@@ -89,10 +89,10 @@ export class DataProcessor {
                 const rItem = group.find(item => item.channel === 'R');
 
                 if (lItem && rItem) {
-                    // Combine all records from both channels, removing channel info
+                    // Combine all records from both channels, preserving channel info
                     const combinedRecords = [
-                        ...lItem.records.map(r => ({ ...r, channel: undefined })),
-                        ...rItem.records.map(r => ({ ...r, channel: undefined }))
+                        ...lItem.records,
+                        ...rItem.records
                     ];
 
                     mergedItems.push({

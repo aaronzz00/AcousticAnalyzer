@@ -135,16 +135,20 @@ export class StatisticsService {
             unitResults.forEach((_, key) => {
                 // Extract SN and rowId from keys like "SN_L_rowId" or "SN_R_rowId" or "SN_rowId"
                 const parts = key.split('_');
-                if (parts.length >= 2) {
-                    const rowId = parts[parts.length - 1];
-                    const channel = parts.length === 3 ? parts[1] : null;
+                const rowId = parts[parts.length - 1];
+                let sn = parts[0];
 
-                    if (channel === 'L' || channel === 'R') {
-                        // Dual channel case: "SN_L_rowId" -> "SN_rowId"
-                        const sn = parts[0];
-                        snRowIdPairs.add(`${sn}_${rowId}`);
-                    }
+                if (parts.length >= 3 && (parts[1] === 'L' || parts[1] === 'R')) {
+                    // Reconstruct SN if it contained underscores
+                    sn = key.substring(0, key.lastIndexOf('_')); // Remove rowId
+                    sn = sn.substring(0, sn.lastIndexOf('_')); // Remove Channel
+                } else {
+                    // Single channel: Remove last part (rowId)
+                    sn = key.substring(0, key.lastIndexOf('_'));
                 }
+
+                const snRowId = `${sn}_${rowId}`;
+                snRowIdPairs.add(snRowId);
             });
 
             // For each SN+rowId pair, check if both L and R exist

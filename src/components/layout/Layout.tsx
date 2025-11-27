@@ -1,12 +1,13 @@
 import React from 'react';
-import { Activity } from 'lucide-react';
+import { Activity, CircleHelp } from 'lucide-react';
 
 interface LayoutProps {
     children: React.ReactNode;
     sidebar: React.ReactNode;
+    actions?: React.ReactNode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, sidebar }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, sidebar, actions }) => {
     return (
         <div className="flex h-screen bg-gray-100 overflow-hidden">
             {/* Sidebar */}
@@ -18,8 +19,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, sidebar }) => {
                 <div className="flex-1 overflow-y-auto p-2">
                     {sidebar}
                 </div>
-                <div className="p-4 border-t text-xs text-gray-500 text-center">
-                    v0.2.0
+                <div className="p-4 border-t text-xs text-gray-500 flex justify-between items-center">
+                    <span>v0.3.0</span>
+                    <a
+                        href="https://github.com/aaronzz00/AcousticAnalyzer/blob/main/docs/USER_MANUAL.md"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-indigo-600 transition-colors"
+                        title="User Manual"
+                    >
+                        <CircleHelp className="w-4 h-4" />
+                    </a>
                 </div>
             </aside>
 
@@ -28,7 +38,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, sidebar }) => {
                 <header className="bg-white shadow-sm p-4 flex justify-between items-center">
                     <h1 className="text-xl font-semibold text-gray-800">Analysis Report</h1>
                     <div className="flex gap-2">
-                        {/* Toolbar actions can go here */}
+                        {actions}
                     </div>
                 </header>
                 <div className="flex-1 overflow-y-auto p-6">
