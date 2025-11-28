@@ -988,6 +988,22 @@ function App() {
                     </div>
 
 
+
+                    <div className="mt-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Comments
+                      </label>
+                      <textarea
+                        className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        rows={3}
+                        placeholder={`Add comments for ${group[0].name}...`}
+                        value={comments[group[0].name] || ''}
+                        onChange={(e) => {
+                          const newComments = { ...comments, [group[0].name]: e.target.value };
+                          setComments(newComments);
+                        }}
+                      />
+                    </div>
                   </div>
                 );
               })}
