@@ -24,6 +24,7 @@ function App() {
   const [visibility, setVisibility] = useState<Record<string, boolean>>({});
   const [summary, setSummary] = useState<string>('');
   const [reportTitle, setReportTitle] = useState<string>('Acoustic Test Report');
+  const [customTitles, setCustomTitles] = useState<Record<string, string>>({});
 
   // Test metadata fields
   const [testMetadata, setTestMetadata] = useState<Array<{ key: string, value: string }>>([
@@ -932,7 +933,15 @@ function App() {
                 return (
                   <div key={group[0].name} className="border-b pb-8 test-item-group">
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="text-xl font-bold">{group[0].name}</h2>
+                      <input
+                        type="text"
+                        value={customTitles[group[0].name] || group[0].name}
+                        onChange={(e) => {
+                          setCustomTitles(prev => ({ ...prev, [group[0].name]: e.target.value }));
+                        }}
+                        className="text-xl font-bold border-b-2 border-transparent hover:border-gray-300 focus:border-indigo-500 focus:outline-none bg-transparent flex-1"
+                        placeholder={group[0].name}
+                      />
                       <button
                         onClick={() => {
                           const id = group[0].name; // Use name as key for visibility group

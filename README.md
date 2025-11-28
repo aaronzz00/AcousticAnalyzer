@@ -234,4 +234,4 @@ This project is licensed under the MIT License.
 
 ---
 
-**Version / 版本**: v0.3 (November 2025)
+**Version / 版本**: v0.4 (November 2025)
