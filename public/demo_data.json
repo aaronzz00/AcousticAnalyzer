@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "timestamp": 1764141882041,
+  "timestamp": 1764309895569,
   "items": [
     {
       "id": "Pure_tone_Hz_L",
@@ -43858,11 +43858,12 @@
     }
   ],
   "comments": {
-    "Pure_tone_Hz": "No comment.",
-    "A2DP_SPK_FR": "-",
-    "A2DP_SPK_THD": "-",
+    "Pure_tone_Hz": "--- AI Analysis ---\n**Analysis of Pure_tone_Hz Test Data:**\n\n1.  **Consistency Verification:** The batch demonstrates high consistency, with 15 out of 16 units (93.75%) successfully passing the \"Pure_tone_Hz\" test. This indicates reliable performance across the majority of products.\n2.  **Outlier Identification:** A clear outlier has been identified: one unit failed the test. Further investigation into this specific unit is recommended to understand the root cause of its deviation.\n3.  **Distribution Analysis:** The distribution is highly clustered towards the passing criteria, with only a single unit falling outside the acceptable range. This suggests that the \"Pure_tone_Hz\" performance is generally robust for this product configuration, with the failure likely representing an isolated anomaly rather than a systemic issue.\n\nConclusion: The batch exhibits strong performance consistency for \"Pure_tone_Hz\", with a single outlier requiring individual review.",
+    "A2DP_SPK_FR": "--- AI Analysis ---\n**Analysis of A2DP_SPK_FR Test Data:**\n\nThe batch performance for the \"A2DP_SPK_FR\" test item demonstrates high overall consistency, with 15 out of 16 units successfully passing (93.75% pass rate).\n\nA single failed unit is clearly identified as an outlier within this batch. This unit deviates significantly from the overwhelmingly successful performance of its counterparts.\n\nThe distribution analysis reveals a strong clustering of passing units, indicating that the vast majority of products meet the specified acoustic criteria for A2DP_SPK_FR. The isolated failure suggests a localized issue rather than a widespread systemic problem across the batch.\n\nConclusion: The batch exhibits robust consistency for A2DP_SPK_FR, but the single failed unit warrants immediate investigation for root cause identification.",
+    "A2DP_SPK_THD": "--- AI Analysis ---\nThe \"A2DP_SPK_THD\" test data indicates strong performance and consistency across the batch.\n\n1.  **Consistency Verification:** The batch shows high consistency with a 93.75% pass rate (15 out of 16 units successfully passed).\n2.  **Outlier Identification:** One unit failed the test, clearly identifying it as an outlier within an otherwise successful batch. This suggests an isolated deviation from the expected performance.\n3.  **Distribution Analysis:** The performance distribution is heavily skewed towards successful outcomes, with the vast majority of units meeting the \"A2DP_SPK_THD\" criteria. The single failure stands out significantly from this predominantly passing distribution.\n\nConclusion: The batch demonstrates excellent overall performance for A2DP_SPK_THD, with one distinct outlier unit requiring specific investigation.",
     "HFA": "-",
-    "Output70dB THD": "-"
+    "Output70dB THD": "--- AI Analysis ---\nThe \"Output70dB THD\" test for all 16 units demonstrates excellent consistency. With a 100% pass rate, every unit met the specified performance criteria, indicating uniform product quality. No outliers were identified based on the pass/fail status, as all 16 units successfully passed. While specific measurement values are not provided, the perfect pass rate suggests a well-controlled manufacturing process resulting in a tight distribution of THD measurements, with all units performing comfortably within the acceptable limits.\nConclusion: All units consistently meet the \"Output70dB THD\" specification, showing uniform performance.",
+    "MIC_FR_Diff": "--- AI Analysis ---\n**Analysis of MIC_FR_Diff Test Data**\n\n1.  **Consistency Verification:** The batch exhibits excellent consistency for \"MIC_FR_Diff,\" with all 16 units (100.00%) successfully passing the test. This indicates uniform performance within the specified limits.\n2.  **Outlier Identification:** Based on the pass/fail statistics, no outliers were identified, as every unit met the required specifications.\n3.  **Distribution Analysis:** The 100% pass rate confirms that the entire distribution of \"MIC_FR_Diff\" measurements for this batch falls within the acceptable range, demonstrating robust performance across all tested units.\n\n**Conclusion:** This batch exhibits uniform and robust performance for \"MIC_FR_Diff\", with no units failing the test."
   },
   "visibility": {
     "Pure_tone_Hz": true,
@@ -43874,10 +43875,10 @@
   },
   "filterOptions": {
     "deduplicate": true,
-    "filterType": "PASS_ONLY",
+    "filterType": "ALL",
     "mergeChannels": false
   },
-  "summary": "Just test.",
+  "summary": "--- AI Executive Summary ---\n## Executive Summary: Acoustic Performance Analysis of Current Batch\n\nThis executive summary outlines the acoustic performance of the recent batch of 16 units, based on the provided test item comments.\n\n### 1. Overall Assessment of Product Performance\n\nThe batch demonstrates strong overall acoustic performance and high consistency across the majority of tested parameters. A significant portion of the tests, specifically \"Output70dB THD\" and \"MIC_FR_Diff,\" achieved a perfect 100% pass rate, indicating excellent uniformity and robust performance in these areas. The remaining assessed tests (\"Pure_tone_Hz,\" \"A2DP_SPK_FR,\" and \"A2DP_SPK_THD\") also exhibited very high pass rates, with 15 out of 16 units (93.75%) successfully meeting their respective specifications. This generally points to a well-controlled manufacturing process yielding high-quality acoustic output.\n\n### 2. Key Issues Identified Across Different Test Items\n\nThe primary issue identified is the consistent failure of a single, distinct unit across multiple acoustic performance tests. This individual unit failed the \"Pure_tone_Hz\" test, the \"A2DP_SPK_FR\" test, and the \"A2DP_SPK_THD\" test. This pattern strongly suggests an isolated defect or anomaly within this specific unit, rather than a systemic batch-wide issue affecting these parameters. The distribution analyses for these tests confirmed that this single failure stands out significantly from an otherwise successful majority. Furthermore, data for the \"HFA\" test item was not provided, precluding its evaluation and indicating a gap in the comprehensive acoustic assessment.\n\n### 3. Final Conclusion\n\nThe batch displays commendable overall acoustic consistency and performance, with the vast majority of units successfully passing all evaluated tests. The predominant concern is the identification of a singular, recurring outlier unit that consistently fails across multiple critical acoustic measurements. It is strongly recommended that this specific failed unit undergo immediate and thorough root cause analysis to pinpoint the underlying defect. Additionally, the missing data for the \"HFA\" test item should be acquired to complete the acoustic profile assessment of the batch. The high pass rates observed across the other units suggest that, with the exception of this identified outlier, the current production process is largely effective in delivering products that meet acoustic performance specifications.",
   "reportTitle": "Test Report Demo",
   "chartLayouts": {},
   "testMetadata": [

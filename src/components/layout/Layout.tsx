@@ -20,7 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, sidebar, actions }) =>
                     {sidebar}
                 </div>
                 <div className="p-4 border-t text-xs text-gray-500 flex justify-between items-center">
-                    <span>v0.3.0</span>
+                    <span>v0.4</span>
                     <a
                         href="https://github.com/aaronzz00/AcousticAnalyzer/blob/main/docs/USER_MANUAL.md"
                         target="_blank"

@@ -12,7 +12,8 @@ import type { TestItem } from './types';
 import { DataProcessor, type FilterOptions } from './services/DataProcessor';
 import { StatisticsService } from './services/StatisticsService';
 import { PersistenceService } from './services/PersistenceService';
-import { Download, Filter, Save, EyeOff, Plus, Play, Upload } from 'lucide-react';
+import { Download, Filter, Save, EyeOff, Plus, Play, Upload, Sparkles } from 'lucide-react';
+import { AIService } from './services/AIService';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -876,12 +877,45 @@ function App() {
               )}
 
               <div className="grid grid-cols-1 gap-4 mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Executive Summary
+                  </label>
+                  <button
+                    onClick={async () => {
+                      // Set loading state
+                      const currentSummary = summary || '';
+                      setSummary(currentSummary + (currentSummary ? '\n\n' : '') + "Generating executive summary with AI...");
+
+                      try {
+                        const aiSummary = await AIService.summarizeComments(comments);
+                        setSummary(currentSummary + (currentSummary ? '\n\n' : '') + "--- AI Executive Summary ---\n" + aiSummary);
+                      } catch (e) {
+                        setSummary(currentSummary + (currentSummary ? '\n\n' : '') + "Error: AI Summary failed.");
+                      }
+                    }}
+                    className="flex items-center gap-1 text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition-colors border border-indigo-200"
+                    title={`Summarize all test item comments with AI (Model: gemini-2.5-flash)`}
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    AI Assist
+                  </button>
+                </div>
                 <textarea
-                  className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-700"
+                  className="w-full p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-700 overflow-hidden resize-none"
                   rows={4}
                   placeholder="Enter executive summary or overall analysis notes here..."
                   value={summary}
-                  onChange={(e) => setSummary(e.target.value)}
+                  onChange={(e) => {
+                    setSummary(e.target.value);
+                    // Auto-resize
+                    e.target.style.height = 'auto';
+                    e.target.style.height = e.target.scrollHeight + 'px';
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.height = 'auto';
+                    e.target.style.height = e.target.scrollHeight + 'px';
+                  }}
                 />
               </div>
             </div>
@@ -990,17 +1024,54 @@ function App() {
 
 
                     <div className="mt-6">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Comments
-                      </label>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Comments
+                        </label>
+                        <button
+                          onClick={async () => {
+                            const id = group[0].name;
+                            // Set loading state (using a temporary loading text in comment or a separate state)
+                            // For simplicity, we'll append a loading message
+                            const currentComment = comments[id] || '';
+                            setComments(prev => ({ ...prev, [id]: currentComment + (currentComment ? '\n\n' : '') + "Analyzing data with AI..." }));
+
+                            try {
+                              const analysis = await AIService.analyzeData(group, filterOptions);
+                              setComments(prev => ({
+                                ...prev,
+                                [id]: currentComment + (currentComment ? '\n\n' : '') + "--- AI Analysis ---\n" + analysis
+                              }));
+                            } catch (e) {
+                              setComments(prev => ({
+                                ...prev,
+                                [id]: currentComment + (currentComment ? '\n\n' : '') + "Error: AI Analysis failed."
+                              }));
+                            }
+                          }}
+                          className="flex items-center gap-1 text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition-colors border border-indigo-200"
+                          title={`Analyze filtered data with AI (Model: gemini-2.5-flash)\nAnalysis is based on current filter settings.`}
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          AI Assist
+                        </button>
+                      </div>
                       <textarea
-                        className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm overflow-hidden resize-none"
                         rows={3}
                         placeholder={`Add comments for ${group[0].name}...`}
                         value={comments[group[0].name] || ''}
                         onChange={(e) => {
                           const newComments = { ...comments, [group[0].name]: e.target.value };
                           setComments(newComments);
+                          // Auto-resize
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
+                        onFocus={(e) => {
+                          // Adjust height on focus in case content was loaded
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
                         }}
                       />
                     </div>

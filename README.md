@@ -1,6 +1,6 @@
 # AcousticAnalyzer
 
-**Version**: v0.3  
+**Version**: v0.4  
 **A professional web-based acoustic test data analysis tool** / **专业的声学测试数据分析网页工具**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  
@@ -23,6 +23,7 @@ AcousticAnalyzer 是一个强大的基于 Web 的声学测试数据分析工具�
 - 🔍 **Flexible Filtering** / **灵活筛选**: Deduplicate, Pass/Fail filters with product-level logic, channel merging
 - 💾 **Project Management** / **项目管理**: Save and load complete analysis sessions
 - 📄 **Report Export** / **报告导出**: Export as PDF or standalone HTML
+- 🤖 **AI Assist** / **AI 辅助**: AI-powered data analysis and automated comment generation
 - ⚡ **Performance Optimized** / **性能优化**: Lazy loading, debouncing, and memoization
 - 🎨 **Modern UI** / **现代界面**: Clean, responsive design with sidebar navigation
 
@@ -205,7 +206,22 @@ This project is licensed under the MIT License.
 
 ---
 
+---
+
+## 📦 What's New in v0.4
+
+### New Features / 新功能
+- **AI Assist** / **AI 辅助**: Integrated Google Gemini AI for automated data analysis and insights generation.
+  - Item-level analysis for consistency, outliers, and distribution patterns
+  - Executive summary generation from all test comments
+  - Configurable with `gemini-2.5-flash` model
+- **Auto-Resize Comments** / **评论自动调整大小**: Comment boxes now automatically expand to fit content.
+- **Enhanced Tooltips** / **增强的提示**: AI button tooltips now show model information and filter context.
+
+---
+
 ## 📦 What's New in v0.3
+
 
 ### New Features / 新功能
 - **UI Enhancements** / **界面增强**: Modernized Home Screen layout with improved button placement and compact upload area.

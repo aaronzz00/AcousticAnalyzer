@@ -1,7 +1,7 @@
 # AcousticAnalyzer User Manual  
 # AcousticAnalyzer 用户手册
 
-**Version / 版本**: v0.3  
+**Version / 版本**: v0.4  
 **Last Updated / 最后更新**: November 2025
 
 ---
@@ -402,9 +402,14 @@ Statistics for each test item are displayed below the charts:
 
 ## Version Information / 版本信息
 
-**Current Version / 当前版本**: v0.3
+**Current Version / 当前版本**: v0.4
 
 **Changelog / 更新日志**:
+- v0.4 (2025-11): AI Integration / AI 集成
+  - AI Assist for automated data analysis / AI 辅助自动数据分析
+  - Executive summary generation / 执行摘要生成
+  - Auto-resize comment boxes / 评论框自动调整大小
+  - Enhanced tooltips with model info / 增强的提示信息
 - v0.3 (2025-11): UI & Statistics Update / 界面与统计更新
   - Modernized Home Screen layout / 现代化主页布局
   - Separate L/R statistics display / 独立 L/R 统计显示
